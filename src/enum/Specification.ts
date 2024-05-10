@@ -1,0 +1,4 @@
+export enum SPECIFICATION_TYPE {
+  IMAGE,
+  NORMAL,
+}

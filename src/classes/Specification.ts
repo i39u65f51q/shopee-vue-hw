@@ -1,46 +1,51 @@
-type SpecificationItem = {
-  id: number
-  name: string
-}
-
-type SpecificationImgItem = {
-  imgUrl: string
-} & SpecificationItem
+import { SPECIFICATION_TYPE } from '@/enum/Specification'
+import type { SpecificationImgItem, SpecificationItem } from '@/types/Specification'
 
 abstract class SpecificationBase {
-  public readonly id: number
+  public readonly uuid: string
   public name: string
+  private readonly type: SPECIFICATION_TYPE
+
   public abstract items: SpecificationItem[]
-  constructor(id: number, name: string) {
-    this.id = id
+  constructor(uuid: string, name: string, type: SPECIFICATION_TYPE) {
+    this.uuid = uuid
     this.name = name
+    this.type = type
   }
 
   //新增規格內項目
-  public pushItem(item: SpecificationBase) {
-    this.items.push(item)
-  }
+  public abstract pushItem(item: SpecificationImgItem): void
   //移除規格內項目
-  public removeItem(id: number) {
-    if (this.items.length == 1) return
-    this.items.filter(item => item.id !== id)
+  public removeItem(uuid: string) {
+    this.items = this.items.filter(item => item.uuid !== uuid)
+  }
+  public getType(): SPECIFICATION_TYPE {
+    return this.type
   }
 }
 
 //有圖片的規格
 export class SpecificationImg extends SpecificationBase {
   public readonly items: SpecificationImgItem[]
-  constructor(id: number, name: string) {
-    super(id, name)
-    this.items = [{ id: 1, imgUrl: '', name: '' }]
+  constructor(uuid: string, name: string) {
+    super(uuid, name, SPECIFICATION_TYPE.IMAGE)
+    this.items = []
+  }
+
+  public override pushItem(item: SpecificationImgItem) {
+    this.items.push(item)
   }
 }
 
 //普通文字的規格
 export class SpecificationNormal extends SpecificationBase {
   public readonly items: SpecificationItem[]
-  constructor(id: number, name: string) {
-    super(id, name)
-    this.items = [{ id: 1, name: '' }]
+  constructor(uuid: string, name: string) {
+    super(uuid, name, SPECIFICATION_TYPE.NORMAL)
+    this.items = []
+  }
+
+  public override pushItem(item: SpecificationItem) {
+    this.items.push(item)
   }
 }

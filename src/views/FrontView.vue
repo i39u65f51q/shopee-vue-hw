@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { useSpecificationListStore } from '@/stores/specification'
+import { useProductStore } from '@/stores/product'
+import { NSpace } from 'naive-ui'
 
-const specificationList = useSpecificationListStore()
+const { productDetails } = useProductStore()
 </script>
 
 <template>
-  <div class="wrap"></div>
+  <n-space> Front-page </n-space>
 </template>
 
 <style scoped></style>
