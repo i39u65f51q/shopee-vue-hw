@@ -1,5 +1,6 @@
 import { SPECIFICATION_TYPE } from '@/enum/Specification'
 import type { SpecificationImgItem, SpecificationItem } from '@/types/Specification'
+import { uuid as vuuid } from 'vue-uuid'
 
 abstract class SpecificationBase {
   public readonly uuid: string
@@ -29,7 +30,7 @@ export class SpecificationImg extends SpecificationBase {
   public readonly items: SpecificationImgItem[]
   constructor(uuid: string, name: string) {
     super(uuid, name, SPECIFICATION_TYPE.IMAGE)
-    this.items = []
+    this.items = [{ uuid: vuuid.v4(), name: '', imgUrl: '' }]
   }
 
   public override pushItem(item: SpecificationImgItem) {
@@ -42,7 +43,7 @@ export class SpecificationNormal extends SpecificationBase {
   public readonly items: SpecificationItem[]
   constructor(uuid: string, name: string) {
     super(uuid, name, SPECIFICATION_TYPE.NORMAL)
-    this.items = []
+    this.items = [{ uuid: vuuid.v4(), name: '' }]
   }
 
   public override pushItem(item: SpecificationItem) {

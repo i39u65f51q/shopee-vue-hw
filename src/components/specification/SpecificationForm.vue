@@ -1,8 +1,8 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
 import type { SpecificationImg, SpecificationNormal } from '@/classes/Specification'
-import { NSpace, NButton, NCard, NDivider } from 'naive-ui'
-import SpecificationItem from './SpecificationItem.vue'
+import { NFlex, NButton, NCard, NDivider, NInput } from 'naive-ui'
+import SpecificationItemWrap from './SpecificationItemWrap.vue'
 
 const props = defineProps<{
   specification: SpecificationImg | SpecificationNormal
@@ -18,14 +18,22 @@ function toggleEdit(): void {
 </script>
 <template>
   <n-card>
-    <n-space>
+    <n-flex align="center" :wrap="false">
       <span v-if="!onEdit">{{ s.name }}</span>
-      <input v-else v-model="s.name" />
-      <span>(自定義)</span>
+      <n-input v-else v-model:value="s.name" type="text" />
+      <span class="secondary">(自定義)</span>
       <n-button @click="toggleEdit">{{ onEdit ? '完成' : '編輯' }}</n-button>
       <n-button @click="remove(s.uuid)">移除</n-button>
-    </n-space>
+    </n-flex>
     <n-divider />
-    <SpecificationItem :specification="s" />
+    <SpecificationItemWrap :specification="s" />
   </n-card>
 </template>
+<style scoped>
+.n-input {
+  width: 150px;
+}
+.secondary {
+  color: #aaa;
+}
+</style>
