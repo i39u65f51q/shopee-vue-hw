@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useSpecificationStore } from '@/stores/specifications'
 import SpecificationForm from '@/components/specification/SpecificationForm.vue'
-import ProductDetailForm from '@/components/product/ProductDetailForm.vue'
+import ProductTable from '@/components/product/ProductTable.vue'
 import { NSpace, NButton, NFlex } from 'naive-ui'
 import type { SpecificationImg, SpecificationNormal } from '@/classes/Specification'
 const { specificationList, addSpecification, removeSpecification } = useSpecificationStore()
@@ -28,7 +28,7 @@ function remove(uuid: string): void {
         :specification="(s as SpecificationImg | SpecificationNormal)"
       />
     </n-flex>
-    <ProductDetailForm />
+    <ProductTable />
   </n-space>
 </template>
 

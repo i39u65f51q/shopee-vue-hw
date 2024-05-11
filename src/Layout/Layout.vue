@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { onMounted, ref } from 'vue'
 import { RouterView, useRouter } from 'vue-router'
-import { NLayout, NSpace, NLayoutFooter, NLayoutHeader, NLayoutContent } from 'naive-ui'
+import { NLayout, NSpace, NLayoutFooter, NLayoutHeader, NLayoutContent, useMessage } from 'naive-ui'
 
 onMounted(() => {
   const router = useRouter()
@@ -22,6 +22,6 @@ onMounted(() => {
 <style scoped>
 .n-layout {
   width: 100%;
-  height: 100%;
+  min-height: 100vh;
 }
 </style>
