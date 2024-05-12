@@ -17,18 +17,18 @@ export const useProductsStore = defineStore('product', () => {
         trees.push(new SpecificationTree(node)) //圖片檔規格為root，每一格圖片檔規格為一棵樹
       })
       trees.forEach((tree: SpecificationTree) => {
-        //一個圖片檔規格為1顆樹
-        const lastLevelNodes: SpecificationNode[] = tree.getLastLevelNodes()
-        lastLevelNodes.forEach((node: SpecificationNode) => {
-          //圖片後的其他規格
-          for (let i = 1; i < specificationList.length; i++) {
+        //圖片後的其他規格
+        for (let i = 1; i < specificationList.length; i++) {
+          //尋找每個圖片規格的最後一個規格新增新規格
+          const nodes = tree.findLastLevelNodes(tree.root)
+          nodes.forEach(node => {
             const { uuid, items } = specificationList[i]
             items.forEach((s: SpecificationItem) => {
               const newNode = new SpecificationNode(s.uuid, s.name, uuid)
               node.addNode(newNode)
             })
-          }
-        })
+          })
+        }
       })
       products.value = trees
     }

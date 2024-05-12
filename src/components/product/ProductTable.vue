@@ -23,6 +23,7 @@ specificationStore.$subscribe((mutations, state) => {
 
 productsStore.$subscribe((mutation, state) => {
   products.value = state.products
+  console.log('p', state.products)
   updateTableData(state.products)
 })
 
@@ -75,29 +76,31 @@ function updateTableData(trees: SpecificationTree[]): void {
   const rowDataCollection: RowData[] = []
   trees.forEach((tree: SpecificationTree) => {
     const node: SpecificationNode = tree.root
-    const collection = pushRow(node)
+    const collection = getRowDataList(node)
     rowDataCollection.push(...collection)
   })
 
-  function pushRow(node: SpecificationNode): RowData[] {
+  function getRowDataList(node: SpecificationNode): RowData[] {
+    //FIXME:
     if (!node.hasChildren()) {
+      //最後一層
       const row = { key: uuid.v4(), id: node.uuid, name: node.name, price: node.price, counts: node.counts }
       set(row, node.colKey, node.name)
       return [row]
     }
+    //接住最後一層的資料
     const totalCollection: RowData[] = []
     node.children.forEach(child => {
-      const newCollection = pushRow(child) //最後一層的資料
+      const newCollection = getRowDataList(child) //最後一層的資料
       totalCollection.push(...newCollection)
     })
-
     totalCollection.forEach(rowData => {
       set(rowData, node.colKey, node.name)
     })
     //將最後一層的資料往上層送
     return totalCollection
   }
-  console.log(rowDataCollection)
+  // console.log(rowDataCollection)
   tableData.value = rowDataCollection
 }
 

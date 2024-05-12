@@ -12,21 +12,25 @@ export class SpecificationTree {
     //this.parents.forEach(n => {})
   }
 
-  public getLastLevelNodes(): SpecificationNode[] {
+  public findLastLevelNodes(root: SpecificationNode): SpecificationNode[] {
     let currentLevelNodes: SpecificationNode[] = []
-    let queue: SpecificationNode[] = [this.root] //第一層開始往下遍歷
+    let queue: SpecificationNode[] = [root] //第一層開始往下遍歷
     while (queue.length > 0) {
-      const size: number = queue.length
-      currentLevelNodes = []
-      for (let i = 0; i < size; i++) {
-        const node: SpecificationNode | undefined = queue.shift() //從最前面開始清node
-        if (!node) break
-        currentLevelNodes.push(node)
-        if (node.hasChildren()) {
-          queue.push(...node.children)
+      const levelSize = queue.length
+      currentLevelNodes = [] // 清空當前層的節點列表，準備收集新一層
+
+      for (let i = 0; i < levelSize; i++) {
+        const node = queue.shift() // 從隊列中取出節點
+        if (node) {
+          currentLevelNodes.push(node) // 加入當前層的節點列表
+
+          if (node.hasChildren()) {
+            queue.push(...node.children)
+          }
         }
       }
     }
+
     return currentLevelNodes
   }
 }
