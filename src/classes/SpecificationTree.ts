@@ -37,12 +37,14 @@ export class SpecificationNode {
   public price: number
   public readonly name: string
   public readonly children: SpecificationNode[]
-  constructor(uuid: string, name: string) {
+  public readonly colKey: string
+  constructor(uuid: string, name: string, colKey: string) {
     this.uuid = uuid
     this.counts = 1
     this.price = 0
     this.name = name
     this.children = []
+    this.colKey = colKey
   }
 
   public addNode(node: SpecificationNode): void {

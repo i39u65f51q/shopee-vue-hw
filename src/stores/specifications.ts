@@ -7,7 +7,7 @@ import { createDiscreteApi, useMessage } from 'naive-ui'
 export const useSpecificationStore = defineStore('specification', () => {
   const { message } = createDiscreteApi(['message'])
   //規格數量限制
-  const maxCounts: number = 2
+  const maxCounts: number = 3
 
   //規格清單
   const specificationList: Ref<(SpecificationImg | SpecificationNormal)[]> = ref([])

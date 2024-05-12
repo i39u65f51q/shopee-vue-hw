@@ -1,16 +1,19 @@
 <script lang="ts" setup>
 import type { SpecificationImg, SpecificationNormal } from '@/classes/Specification'
-import type { SpecificationTree } from '@/classes/SpecificationTree'
+import type { SpecificationNode, SpecificationTree } from '@/classes/SpecificationTree'
 import { useProductsStore } from '@/stores/products'
 import { useSpecificationStore } from '@/stores/specifications'
-import { onMounted, ref } from 'vue'
-import { NDataTable } from 'naive-ui'
+import { onMounted, ref, h } from 'vue'
+import { NDataTable, NInput } from 'naive-ui'
+import type { RowData, TableColumn } from 'naive-ui/es/data-table/src/interface'
+import { set } from 'lodash'
+import { uuid } from 'vue-uuid'
 
 const specificationStore = useSpecificationStore()
 const productsStore = useProductsStore()
 const products = ref<SpecificationTree[]>([])
-const columns = ref<{ title: string; key: string }[]>([])
-const tableData = ref([])
+const columns = ref<TableColumn[]>([])
+const tableData = ref<RowData[]>([])
 
 specificationStore.$subscribe((mutations, state) => {
   const specificationList = state.specificationList as (SpecificationImg | SpecificationNormal)[]
@@ -20,21 +23,91 @@ specificationStore.$subscribe((mutations, state) => {
 
 productsStore.$subscribe((mutation, state) => {
   products.value = state.products
+  updateTableData(state.products)
 })
 
-function updateColumns(specificationList: (SpecificationImg | SpecificationNormal)[]): void {
-  columns.value = specificationList
-    .map(s => {
-      return { title: s.name, key: s.name }
-    })
-    .concat([
-      { title: '價格', key: 'price' },
-      { title: '商品數量', key: 'counts' },
-    ])
+function updateColumns(list: (SpecificationImg | SpecificationNormal)[]): void {
+  if (list.length == 0) return
+
+  const cols: TableColumn[] = list.map((s, index: number) => {
+    return { title: s.name, key: s.uuid, rowSpan: (rowData, rowIndex) => getRowSpan(list, index) }
+  })
+  const temp = [
+    {
+      title: '價格',
+      key: 'price',
+      rowSpan: () => 1,
+      render: (row: any) => {
+        return h(NInput, {
+          type: 'text',
+          value: row.value,
+          placeholder: '請輸入價格',
+          onUpdateValue: v => updatePrice(v, row),
+        })
+      },
+    },
+    {
+      title: '商品數量',
+      key: 'counts',
+      rowSpan: () => 1,
+      render: (row: any) => {
+        return h(NInput, {
+          type: 'text',
+          value: row.value,
+          placeholder: '請輸入數量',
+          onUpdateValue: v => updateCounts(v, row),
+        })
+      },
+    },
+  ]
+  columns.value = cols.concat(temp)
 }
 
-function updateTableData(): void {
-  tableData.value = []
+function updatePrice(newValue: string | number, row: RowData) {
+  console.log('price', newValue)
+}
+
+function updateCounts(newValue: string | number, row: RowData) {
+  console.log('count', newValue)
+}
+
+function updateTableData(trees: SpecificationTree[]): void {
+  const rowDataCollection: RowData[] = []
+  trees.forEach((tree: SpecificationTree) => {
+    const node: SpecificationNode = tree.root
+    const collection = pushRow(node)
+    rowDataCollection.push(...collection)
+  })
+
+  function pushRow(node: SpecificationNode): RowData[] {
+    if (!node.hasChildren()) {
+      const row = { key: uuid.v4(), id: node.uuid, name: node.name, price: node.price, counts: node.counts }
+      set(row, node.colKey, node.name)
+      return [row]
+    }
+    const totalCollection: RowData[] = []
+    node.children.forEach(child => {
+      const newCollection = pushRow(child) //最後一層的資料
+      totalCollection.push(...newCollection)
+    })
+
+    totalCollection.forEach(rowData => {
+      set(rowData, node.colKey, node.name)
+    })
+    //將最後一層的資料往上層送
+    return totalCollection
+  }
+  console.log(rowDataCollection)
+  tableData.value = rowDataCollection
+}
+
+function getRowSpan(list: (SpecificationImg | SpecificationNormal)[], index: number): number {
+  let counts = 1
+  let nextIndex = index + 1
+  for (let i = nextIndex; i < list.length; i++) {
+    counts *= list[nextIndex].items.length
+  }
+  return counts
 }
 
 onMounted(() => {
