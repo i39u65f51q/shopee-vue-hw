@@ -4,12 +4,16 @@ export class SpecificationTree {
     this.root = root
   }
 
-  public search(node: SpecificationNode, targetuuId: string) {
-    //this.parents.forEach(n => {})
-  }
-
-  public remove(node: SpecificationNode, targetuuId: string) {
-    //this.parents.forEach(n => {})
+  public search(root: SpecificationNode, targetuuId: string) {
+    const queue = [root]
+    while (queue.length > 0) {
+      const node = queue.shift()
+      if (!node) continue
+      if (node.uuid === targetuuId) return node
+      else if (node.hasChildren()) {
+        queue.push(...node.children)
+      }
+    }
   }
 
   public findLastLevelNodes(root: SpecificationNode): SpecificationNode[] {

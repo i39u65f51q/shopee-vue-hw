@@ -34,5 +34,9 @@ export const useProductsStore = defineStore('product', () => {
     }
   }
 
-  return { products, update }
+  function replace(newTree: SpecificationTree[]): void {
+    products.value = newTree
+  }
+
+  return { products, update, replace }
 })

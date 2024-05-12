@@ -2,12 +2,12 @@ import { SpecificationImg, SpecificationNormal } from '@/classes/Specification'
 import { defineStore } from 'pinia'
 import { ref, type Ref } from 'vue'
 import { uuid } from 'vue-uuid'
-import { createDiscreteApi, useMessage } from 'naive-ui'
+import { createDiscreteApi } from 'naive-ui'
 
 export const useSpecificationStore = defineStore('specification', () => {
   const { message } = createDiscreteApi(['message'])
   //規格數量限制
-  const maxCounts: number = 3
+  const maxCounts: number = 2
 
   //規格清單
   const specificationList: Ref<(SpecificationImg | SpecificationNormal)[]> = ref([])

@@ -4,7 +4,7 @@ import type { SpecificationNode, SpecificationTree } from '@/classes/Specificati
 import { useProductsStore } from '@/stores/products'
 import { useSpecificationStore } from '@/stores/specifications'
 import { onMounted, ref, h } from 'vue'
-import { NDataTable, NInput } from 'naive-ui'
+import { NDataTable, NInput, NButton } from 'naive-ui'
 import type { RowData, TableColumn } from 'naive-ui/es/data-table/src/interface'
 import { set } from 'lodash'
 import { uuid } from 'vue-uuid'
@@ -23,7 +23,6 @@ specificationStore.$subscribe((mutations, state) => {
 
 productsStore.$subscribe((mutation, state) => {
   products.value = state.products
-  console.log('p', state.products)
   updateTableData(state.products)
 })
 
@@ -38,10 +37,9 @@ function updateColumns(list: (SpecificationImg | SpecificationNormal)[]): void {
       title: '價格',
       key: 'price',
       rowSpan: () => 1,
-      render: (row: any) => {
+      render: (row: RowData) => {
         return h(NInput, {
-          type: 'text',
-          value: row.value,
+          value: row.price.toString(),
           placeholder: '請輸入價格',
           onUpdateValue: v => updatePrice(v, row),
         })
@@ -51,10 +49,9 @@ function updateColumns(list: (SpecificationImg | SpecificationNormal)[]): void {
       title: '商品數量',
       key: 'counts',
       rowSpan: () => 1,
-      render: (row: any) => {
+      render: (row: RowData) => {
         return h(NInput, {
-          type: 'text',
-          value: row.value,
+          value: row.counts.toString(),
           placeholder: '請輸入數量',
           onUpdateValue: v => updateCounts(v, row),
         })
@@ -65,11 +62,11 @@ function updateColumns(list: (SpecificationImg | SpecificationNormal)[]): void {
 }
 
 function updatePrice(newValue: string | number, row: RowData) {
-  console.log('price', newValue)
+  row.price = newValue
 }
 
 function updateCounts(newValue: string | number, row: RowData) {
-  console.log('count', newValue)
+  row.counts = newValue
 }
 
 function updateTableData(trees: SpecificationTree[]): void {
@@ -81,7 +78,6 @@ function updateTableData(trees: SpecificationTree[]): void {
   })
 
   function getRowDataList(node: SpecificationNode): RowData[] {
-    //FIXME:
     if (!node.hasChildren()) {
       //最後一層
       const row = { key: uuid.v4(), id: node.uuid, name: node.name, price: node.price, counts: node.counts }
@@ -100,7 +96,6 @@ function updateTableData(trees: SpecificationTree[]): void {
     //將最後一層的資料往上層送
     return totalCollection
   }
-  // console.log(rowDataCollection)
   tableData.value = rowDataCollection
 }
 
@@ -113,10 +108,29 @@ function getRowSpan(list: (SpecificationImg | SpecificationNormal)[], index: num
   return counts
 }
 
+function save(): void {
+  tableData.value.forEach((row: RowData) => {
+    const { id, price, counts } = row
+    for (const tree of products.value) {
+      const targetNode = tree.search(tree.root, id)
+      if (!targetNode) continue
+      targetNode.price = price
+      targetNode.counts = counts
+    }
+  })
+  productsStore.replace(products.value)
+}
+
 onMounted(() => {
   updateColumns(specificationStore.specificationList as (SpecificationImg | SpecificationNormal)[])
 })
 </script>
 <template>
   <n-data-table :columns="columns" :data="tableData"> </n-data-table>
+  <n-button @click="save" type="primary">儲存</n-button>
 </template>
+<style scoped>
+.n-button {
+  width: 100%;
+}
+</style>
