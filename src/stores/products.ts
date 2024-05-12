@@ -23,6 +23,7 @@ export const useProductsStore = defineStore('product', () => {
           //尋找每個圖片規格的最後一個規格新增新規格
           const nodes = tree.findLastLevelNodes(tree.root)
           nodes.forEach(node => {
+            //colKey為規格得uuid，非規格內item的uuid
             const { uuid: colKey, items } = specificationList[i]
             items.forEach((s: SpecificationItem) => {
               const newNode = new SpecificationNode(uuid.v4(), s.name, colKey)

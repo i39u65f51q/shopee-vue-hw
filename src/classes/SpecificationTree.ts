@@ -16,6 +16,18 @@ export class SpecificationTree {
     }
   }
 
+  public searchColKey(root: SpecificationNode, colKey: string) {
+    const queue = [root]
+    while (queue.length > 0) {
+      const node = queue.shift()
+      if (!node) continue
+      if (node.colKey === colKey) return node
+      else if (node.hasChildren()) {
+        queue.push(...node.children)
+      }
+    }
+  }
+
   public findLastLevelNodes(root: SpecificationNode): SpecificationNode[] {
     let currentLevelNodes: SpecificationNode[] = []
     let queue: SpecificationNode[] = [root] //第一層開始往下遍歷

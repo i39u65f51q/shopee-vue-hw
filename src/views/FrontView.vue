@@ -4,8 +4,9 @@ import { SpecificationNode, type SpecificationTree } from '@/classes/Specificati
 import { useProductsStore } from '@/stores/products'
 import { useSpecificationStore } from '@/stores/specifications'
 import type { SpecificationImgItem, SpecificationItem } from '@/types/Specification'
+import { set } from 'lodash'
 import { NFlex, NImage, NButton, NInputNumber, createDiscreteApi } from 'naive-ui'
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref, type ComputedRef } from 'vue'
 const { message } = createDiscreteApi(['message'])
 const specificationStore = useSpecificationStore()
 const productsStore = useProductsStore()
@@ -13,41 +14,61 @@ const specificationList = ref<(SpecificationImg | SpecificationNormal)[]>([])
 const products = ref<SpecificationTree[]>([])
 const imageItems = ref<SpecificationImgItem[]>([])
 const selectedImgItem = ref<SpecificationImgItem>()
-const selectedSpecification = ref<SpecificationNode>()
+const selectedSpecification = ref<Record<string, string>>({}) //規格的uuid, 規格內項目的uuid
+//SELECT TREE
+const productInfo = ref<SpecificationNode>()
 const purchaseInfo = ref<{ uuid: string; counts: number }>({ uuid: '', counts: 1 })
 
 specificationStore.$subscribe((mutations, state) => {
-  const specificationList = state.specificationList as (SpecificationImg | SpecificationNormal)[]
-  productsStore.update(specificationList)
+  const list = state.specificationList as (SpecificationImg | SpecificationNormal)[]
+  productsStore.update(list)
+  resetSelectedSpecification(list)
 })
 
 productsStore.$subscribe((mutation, state) => {
   products.value = state.products
 })
 
-function onSelect(item: SpecificationImgItem | SpecificationItem) {
-  if (specificationList.value.length > 1) {
-    //TODO:
-  } else {
-    // TODO: 只有圖片檔
+//找到規格內相同得uuid資料再去map Product的資料(price, count)
+function onSelect(sUUid: string, itemUUid: string) {
+  //TREE的id不存，先找出樹在找出node
+  for (const prop in selectedSpecification.value) {
+    if (prop === sUUid) {
+      selectedSpecification.value[prop] = itemUUid
+    }
+    for (const tree of products.value) {
+      //判斷有沒有price/counts，有的話代表找到
+      let node
+      if (specificationList.value.length > 1) {
+        node = tree.searchColKey(tree.root, itemUUid)
+      } else {
+        node = tree.search(tree.root, itemUUid)
+      }
+      if (node && node.counts !== undefined) {
+        productInfo.value = node
+      }
+    }
   }
 }
 
 function purchase(): void {
   if (!selectedSpecification.value) return
-  if (purchaseInfo.value.counts > selectedSpecification.value.counts) {
-    message.error('購買失敗，數量超過最大')
-    return
-  }
   message.success('購買成功')
+}
+
+function resetSelectedSpecification(list: (SpecificationImg | SpecificationNormal)[]) {
+  const temp = selectedSpecification.value
+  for (const item of list) {
+    set(temp, item.uuid, '')
+  }
+  selectedSpecification.value = temp
 }
 
 onMounted(() => {
   specificationList.value = specificationStore.specificationList
   products.value = productsStore.products
-  if (products.value.length > 0) {
-    selectedSpecification.value = products.value[0].root //預設選擇第一筆
-  }
+  resetSelectedSpecification(specificationList.value as (SpecificationImg | SpecificationNormal)[])
+
   if (specificationList.value.length !== 0 && specificationList.value[0].items.length !== 0) {
     imageItems.value = (specificationList.value[0] as SpecificationImg).items
     selectedImgItem.value = imageItems.value[0]
@@ -71,7 +92,7 @@ onMounted(() => {
       <n-flex v-for="s in specificationList" :key="s.uuid" vertical>
         <n-flex>
           <span>{{ s.name }}</span>
-          <n-button size="small" v-for="item in s.items" :key="item.uuid" @click="onSelect(item)">{{
+          <n-button size="small" v-for="item in s.items" :key="item.uuid" @click="onSelect(s.uuid, item.uuid)">{{
             item.name
           }}</n-button>
         </n-flex>
@@ -84,9 +105,9 @@ onMounted(() => {
           :min="0"
           :max="selectedSpecification?.counts"
         />
-        <span class="max-count-hint">最大數量{{ selectedSpecification?.counts }}</span>
+        <span class="max-count-hint">最大數量{{ productInfo?.counts }}</span>
       </n-flex>
-      <n-button type="primary" @click="purchase" :disabled="selectedSpecification?.counts == 0">購買</n-button>
+      <n-button type="primary" @click="purchase" :disabled="productInfo?.counts == 0">購買</n-button>
     </n-flex>
   </n-flex>
 </template>
