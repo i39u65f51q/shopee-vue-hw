@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { SpecificationImg, SpecificationNormal } from '@/classes/Specification'
 import { SpecificationNode, type SpecificationTree } from '@/classes/SpecificationTree'
+import { SPECIFICATION_TYPE } from '@/enum/Specification'
 import { useProductsStore } from '@/stores/products'
 import { useSpecificationStore } from '@/stores/specifications'
 import type { SpecificationImgItem, SpecificationItem } from '@/types/Specification'
@@ -15,7 +16,7 @@ const products = ref<SpecificationTree[]>([])
 const imageItems = ref<SpecificationImgItem[]>([])
 const selectedImgItem = ref<SpecificationImgItem>()
 const selectedSpecification = ref<Record<string, string>>({}) //規格的uuid, 規格內項目的uuid
-//SELECT TREE
+const currentTree = ref<SpecificationTree>()
 const productInfo = ref<SpecificationNode>()
 const purchaseInfo = ref<{ uuid: string; counts: number }>({ uuid: '', counts: 1 })
 
@@ -29,31 +30,40 @@ productsStore.$subscribe((mutation, state) => {
   products.value = state.products
 })
 
-//找到規格內相同得uuid資料再去map Product的資料(price, count)
-function onSelect(sUUid: string, itemUUid: string) {
-  //TREE的id不存，先找出樹在找出node
+function onSelect(sUUid: string, itemUUid: string, isImg: boolean) {
   for (const prop in selectedSpecification.value) {
     if (prop === sUUid) {
       selectedSpecification.value[prop] = itemUUid
     }
-    for (const tree of products.value) {
-      //判斷有沒有price/counts，有的話代表找到
-      let node
-      if (specificationList.value.length > 1) {
-        node = tree.searchColKey(tree.root, itemUUid)
-      } else {
-        node = tree.search(tree.root, itemUUid)
+    if (isImg) {
+      for (const tree of products.value) {
+        //判斷有沒有price/counts，有的話代表找到
+        if (tree.root.itemUUid == itemUUid) {
+          currentTree.value = tree
+
+          if (specificationList.value.length == 1) {
+            productInfo.value = tree.root
+          }
+        }
       }
+    } else if (currentTree.value) {
+      const t = currentTree.value
+      const node = t.searchItem(t.root, itemUUid)
       if (node && node.counts !== undefined) {
         productInfo.value = node
       }
     }
   }
+  console.log(productInfo.value)
 }
 
 function purchase(): void {
   if (!selectedSpecification.value) return
-  message.success('購買成功')
+  if (productInfo.value && purchaseInfo.value.counts > productInfo.value.counts) {
+    message.error('購買失敗，超過最大數量')
+  } else {
+    message.success('購買成功')
+  }
 }
 
 function resetSelectedSpecification(list: (SpecificationImg | SpecificationNormal)[]) {
@@ -62,6 +72,10 @@ function resetSelectedSpecification(list: (SpecificationImg | SpecificationNorma
     set(temp, item.uuid, '')
   }
   selectedSpecification.value = temp
+}
+
+function countChange(newValue: null | number) {
+  if (newValue) purchaseInfo.value.counts = newValue
 }
 
 onMounted(() => {
@@ -92,15 +106,19 @@ onMounted(() => {
       <n-flex v-for="s in specificationList" :key="s.uuid" vertical>
         <n-flex>
           <span>{{ s.name }}</span>
-          <n-button size="small" v-for="item in s.items" :key="item.uuid" @click="onSelect(s.uuid, item.uuid)">{{
-            item.name
-          }}</n-button>
+          <n-button
+            size="small"
+            v-for="item in s.items"
+            :key="item.uuid"
+            @click="onSelect(s.uuid, item.uuid, s.getType() === SPECIFICATION_TYPE.IMAGE)"
+            >{{ item.name }}</n-button
+          >
         </n-flex>
       </n-flex>
       <n-flex align="center">
         <span>數量</span>
         <n-input-number
-          :v-model-value="purchaseInfo.counts"
+          :on-change="v => countChange(v)"
           :default-value="1"
           :min="0"
           :max="selectedSpecification?.counts"

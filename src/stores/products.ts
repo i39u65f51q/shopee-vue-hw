@@ -14,7 +14,7 @@ export const useProductsStore = defineStore('product', () => {
     if (specificationList.length > 0) {
       //圖片檔規格
       ;(specificationList[0] as SpecificationImg).items.forEach((s: SpecificationImgItem) => {
-        const node = new SpecificationNode(s.uuid, s.name, specificationList[0].uuid, s.imgUrl)
+        const node = new SpecificationNode(uuid.v4(), s.name, specificationList[0].uuid, s.uuid, s.imgUrl)
         trees.push(new SpecificationTree(node)) //圖片檔規格為root，每一格圖片檔規格為一棵樹
       })
       trees.forEach((tree: SpecificationTree) => {
@@ -24,9 +24,9 @@ export const useProductsStore = defineStore('product', () => {
           const nodes = tree.findLastLevelNodes(tree.root)
           nodes.forEach(node => {
             //colKey為規格得uuid，非規格內item的uuid
-            const { uuid: colKey, items } = specificationList[i]
-            items.forEach((s: SpecificationItem) => {
-              const newNode = new SpecificationNode(uuid.v4(), s.name, colKey)
+            const { uuid: parentUUid, items } = specificationList[i]
+            items.forEach((item: SpecificationItem) => {
+              const newNode = new SpecificationNode(uuid.v4(), item.name, parentUUid, item.uuid)
               node.addNode(newNode)
             })
           })

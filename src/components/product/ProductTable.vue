@@ -81,7 +81,7 @@ function updateTableData(trees: SpecificationTree[]): void {
     if (!node.hasChildren()) {
       //最後一層
       const row = { key: uuid.v4(), id: node.uuid, name: node.name, price: node.price, counts: node.counts }
-      set(row, node.colKey, node.name)
+      set(row, node.parentUUid, node.name)
       return [row]
     }
     //接住最後一層的資料
@@ -91,7 +91,7 @@ function updateTableData(trees: SpecificationTree[]): void {
       totalCollection.push(...newCollection)
     })
     totalCollection.forEach(rowData => {
-      set(rowData, node.colKey, node.name)
+      set(rowData, node.parentUUid, node.name)
     })
     //將最後一層的資料往上層送
     return totalCollection

@@ -16,12 +16,12 @@ export class SpecificationTree {
     }
   }
 
-  public searchColKey(root: SpecificationNode, colKey: string) {
+  public searchItem(root: SpecificationNode, itemUUid: string) {
     const queue = [root]
     while (queue.length > 0) {
       const node = queue.shift()
       if (!node) continue
-      if (node.colKey === colKey) return node
+      if (node.itemUUid === itemUUid) return node
       else if (node.hasChildren()) {
         queue.push(...node.children)
       }
@@ -57,15 +57,17 @@ export class SpecificationNode {
   public price: number
   public readonly name: string
   public readonly children: SpecificationNode[]
-  public readonly colKey: string
+  public readonly parentUUid: string
+  public readonly itemUUid: string
   public readonly imgUrl?: string
-  constructor(uuid: string, name: string, colKey: string, imgUrl?: string) {
+  constructor(uuid: string, name: string, parentUUid: string, itemUUid: string, imgUrl?: string) {
     this.uuid = uuid
     this.counts = 1
     this.price = 0
     this.name = name
     this.children = []
-    this.colKey = colKey
+    this.parentUUid = parentUUid
+    this.itemUUid = itemUUid
     if (imgUrl) this.imgUrl = imgUrl
   }
 
