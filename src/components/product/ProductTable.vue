@@ -4,11 +4,11 @@ import type { SpecificationNode, SpecificationTree } from '@/classes/Specificati
 import { useProductsStore } from '@/stores/products'
 import { useSpecificationStore } from '@/stores/specifications'
 import { onMounted, ref, h } from 'vue'
-import { NDataTable, NInput, NButton } from 'naive-ui'
+import { NDataTable, NInput, NButton, createDiscreteApi } from 'naive-ui'
 import type { RowData, TableColumn } from 'naive-ui/es/data-table/src/interface'
 import { set } from 'lodash'
 import { uuid } from 'vue-uuid'
-
+const { message } = createDiscreteApi(['message'])
 const specificationStore = useSpecificationStore()
 const productsStore = useProductsStore()
 const products = ref<SpecificationTree[]>([])
@@ -119,10 +119,13 @@ function save(): void {
     }
   })
   productsStore.replace(products.value)
+  message.success('儲存成功')
 }
 
 onMounted(() => {
+  products.value = productsStore.products
   updateColumns(specificationStore.specificationList as (SpecificationImg | SpecificationNormal)[])
+  updateTableData(products.value)
 })
 </script>
 <template>

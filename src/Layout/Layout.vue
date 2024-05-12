@@ -3,15 +3,22 @@ import { onMounted, ref } from 'vue'
 import { RouterView, useRouter } from 'vue-router'
 import { NLayout, NSpace, NLayoutFooter, NLayoutHeader, NLayoutContent, useMessage } from 'naive-ui'
 
-onMounted(() => {
-  const router = useRouter()
-  router.push({ path: '/back' })
-})
+// onMounted(() => {
+//   const router = useRouter()
+//   router.push({ path: '/back' })
+// })
 </script>
 <template>
   <n-space vertical size="large">
     <n-layout>
-      <n-layout-header></n-layout-header>
+      <n-layout-header>
+        <nav>
+          <nav>
+            <RouterLink to="/front">Front</RouterLink>
+            <RouterLink to="/back">back</RouterLink>
+          </nav>
+        </nav>
+      </n-layout-header>
       <n-layout-content content-style="padding:24px">
         <RouterView />
       </n-layout-content>

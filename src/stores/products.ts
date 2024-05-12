@@ -2,7 +2,8 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { SpecificationNode, SpecificationTree } from '@/classes/SpecificationTree'
 import type { SpecificationImg, SpecificationNormal } from '@/classes/Specification'
-import type { SpecificationItem } from '@/types/Specification'
+import type { SpecificationImgItem, SpecificationItem } from '@/types/Specification'
+import { uuid } from 'vue-uuid'
 
 export const useProductsStore = defineStore('product', () => {
   const products = ref<SpecificationTree[]>([])
@@ -12,8 +13,8 @@ export const useProductsStore = defineStore('product', () => {
     const trees: SpecificationTree[] = []
     if (specificationList.length > 0) {
       //圖片檔規格
-      specificationList[0].items.forEach((s: SpecificationItem) => {
-        const node = new SpecificationNode(s.uuid, s.name, specificationList[0].uuid)
+      ;(specificationList[0] as SpecificationImg).items.forEach((s: SpecificationImgItem) => {
+        const node = new SpecificationNode(s.uuid, s.name, specificationList[0].uuid, s.imgUrl)
         trees.push(new SpecificationTree(node)) //圖片檔規格為root，每一格圖片檔規格為一棵樹
       })
       trees.forEach((tree: SpecificationTree) => {
@@ -22,9 +23,9 @@ export const useProductsStore = defineStore('product', () => {
           //尋找每個圖片規格的最後一個規格新增新規格
           const nodes = tree.findLastLevelNodes(tree.root)
           nodes.forEach(node => {
-            const { uuid, items } = specificationList[i]
+            const { uuid: colKey, items } = specificationList[i]
             items.forEach((s: SpecificationItem) => {
-              const newNode = new SpecificationNode(s.uuid, s.name, uuid)
+              const newNode = new SpecificationNode(uuid.v4(), s.name, colKey)
               node.addNode(newNode)
             })
           })

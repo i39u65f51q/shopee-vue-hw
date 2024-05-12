@@ -46,13 +46,15 @@ export class SpecificationNode {
   public readonly name: string
   public readonly children: SpecificationNode[]
   public readonly colKey: string
-  constructor(uuid: string, name: string, colKey: string) {
+  public readonly imgUrl?: string
+  constructor(uuid: string, name: string, colKey: string, imgUrl?: string) {
     this.uuid = uuid
     this.counts = 1
     this.price = 0
     this.name = name
     this.children = []
     this.colKey = colKey
+    if (imgUrl) this.imgUrl = imgUrl
   }
 
   public addNode(node: SpecificationNode): void {
