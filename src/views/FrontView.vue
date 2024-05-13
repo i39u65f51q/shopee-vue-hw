@@ -7,7 +7,7 @@ import { useSpecificationStore } from '@/stores/specifications'
 import type { SpecificationImgItem, SpecificationItem } from '@/types/Specification'
 import { set } from 'lodash'
 import { NFlex, NImage, NButton, NInputNumber, createDiscreteApi } from 'naive-ui'
-import { computed, onMounted, ref, type ComputedRef } from 'vue'
+import { onMounted, ref } from 'vue'
 const { message } = createDiscreteApi(['message'])
 const specificationStore = useSpecificationStore()
 const productsStore = useProductsStore()
@@ -33,6 +33,9 @@ productsStore.$subscribe((mutation, state) => {
 function onSelect(sUUid: string, itemUUid: string, isImg: boolean) {
   for (const prop in selectedSpecification.value) {
     if (prop === sUUid) {
+      if (isImg) {
+        resetSelectedSpecification(specificationList.value as (SpecificationImg | SpecificationNormal)[])
+      }
       selectedSpecification.value[prop] = itemUUid
     }
     if (isImg) {
@@ -54,7 +57,6 @@ function onSelect(sUUid: string, itemUUid: string, isImg: boolean) {
       }
     }
   }
-  console.log(productInfo.value)
 }
 
 function purchase(): void {
@@ -78,6 +80,13 @@ function countChange(newValue: null | number) {
   if (newValue) purchaseInfo.value.counts = newValue
 }
 
+function isSelected(itemUUid: string) {
+  for (const prop in selectedSpecification.value) {
+    if (selectedSpecification.value[prop] == itemUUid) return true
+  }
+  return false
+}
+
 onMounted(() => {
   specificationList.value = specificationStore.specificationList
   products.value = productsStore.products
@@ -94,7 +103,7 @@ onMounted(() => {
   <n-flex class="wrapper" justify="center" :wrap="false">
     <!-- IMG -->
     <n-flex vertical class="left">
-      <n-image width="1200" height="600" :src="'https://picsum.photos/200/300'" />
+      <n-image width="800" height="600" :src="selectedImgItem?.imgUrl" />
       <n-flex>
         <n-image v-for="item in imageItems" :src="item.imgUrl" :key="item.uuid" width="100" height="100" />
       </n-flex>
@@ -102,7 +111,7 @@ onMounted(() => {
     <!-- INFO -->
     <n-flex vertical class="right">
       <h2>前端作業測試</h2>
-      <span class="price">$ {{ selectedSpecification?.price || 0 }} </span>
+      <span class="price">$ {{ productInfo?.price || 0 }} </span>
       <n-flex v-for="s in specificationList" :key="s.uuid" vertical>
         <n-flex>
           <span>{{ s.name }}</span>
@@ -110,6 +119,7 @@ onMounted(() => {
             size="small"
             v-for="item in s.items"
             :key="item.uuid"
+            :color="isSelected(item.uuid) ? 'green' : ''"
             @click="onSelect(s.uuid, item.uuid, s.getType() === SPECIFICATION_TYPE.IMAGE)"
             >{{ item.name }}</n-button
           >
@@ -117,15 +127,10 @@ onMounted(() => {
       </n-flex>
       <n-flex align="center">
         <span>數量</span>
-        <n-input-number
-          :on-change="v => countChange(v)"
-          :default-value="1"
-          :min="0"
-          :max="selectedSpecification?.counts"
-        />
-        <span class="max-count-hint">最大數量{{ productInfo?.counts }}</span>
+        <n-input-number :on-change="v => countChange(v)" :default-value="1" :min="0" :max="productInfo?.counts" />
+        <span class="max-count-hint">最大數量{{ productInfo?.counts || 0 }}</span>
       </n-flex>
-      <n-button type="primary" @click="purchase" :disabled="productInfo?.counts == 0">購買</n-button>
+      <n-button type="primary" @click="purchase" :disabled="productInfo?.counts == 0 || !productInfo">購買</n-button>
     </n-flex>
   </n-flex>
 </template>
@@ -137,10 +142,12 @@ onMounted(() => {
 
 .left {
   width: 50%;
+  overflow: hidden;
 }
 .right {
   padding: 0 12px;
   width: 50%;
+  overflow: hidden;
 }
 
 .price {

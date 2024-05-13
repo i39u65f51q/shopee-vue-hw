@@ -1,23 +1,24 @@
 <script lang="ts" setup>
 import { onMounted, ref } from 'vue'
 import { RouterView, useRouter } from 'vue-router'
-import { NLayout, NSpace, NLayoutFooter, NLayoutHeader, NLayoutContent, useMessage } from 'naive-ui'
+import { NLayout, NSpace, NLayoutFooter, NLayoutHeader, NLayoutContent, useMessage, NButton } from 'naive-ui'
 
-// onMounted(() => {
-//   const router = useRouter()
-//   router.push({ path: '/back' })
-// })
+const router = useRouter()
+
+function toFront(): void {
+  router.push({ path: '/front' })
+}
+
+function toBack(): void {
+  router.push({ path: '/back' })
+}
 </script>
 <template>
   <n-space vertical size="large">
     <n-layout>
       <n-layout-header>
-        <nav>
-          <nav>
-            <RouterLink to="/front">Front</RouterLink>
-            <RouterLink to="/back">back</RouterLink>
-          </nav>
-        </nav>
+        <n-button @click="toFront">前台</n-button>
+        <n-button @click="toBack">後台</n-button>
       </n-layout-header>
       <n-layout-content content-style="padding:24px">
         <RouterView />
@@ -30,5 +31,11 @@ import { NLayout, NSpace, NLayoutFooter, NLayoutHeader, NLayoutContent, useMessa
 .n-layout {
   width: 100%;
   min-height: 100vh;
+}
+.n-layout-header {
+  padding: 0 24px;
+  margin-top: 24px;
+  display: flex;
+  gap: 0.5rem;
 }
 </style>
