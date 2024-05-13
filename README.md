@@ -1,33 +1,37 @@
-# vue-hw
+## vue-hw
 
-This template should help get you started developing with Vue 3 in Vite.
+Vue3 蝦皮商品規格後台 - 前端作業
 
-## Recommended IDE Setup
-
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
-
-## Type Support for `.vue` Imports in TS
-
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
-
-## Customize configuration
-
-See [Vite Configuration Reference](https://vitejs.dev/config/).
-
-## Project Setup
+## 專案初始化
 
 ```sh
 npm install
 ```
 
-### Compile and Hot-Reload for Development
+### 執行測試環境
 
 ```sh
 npm run dev
 ```
 
-### Type-Check, Compile and Minify for Production
+### 編譯
 
 ```sh
 npm run build
+```
+
+## 目錄結構
+
+```
+├── App.vue
+├── Layout 頁面佈局
+├── assets
+├── classes 物件
+├── components 共用元件
+├── enum 列舉
+├── main.ts
+├── router 路由設定
+├── stores 狀態儲存
+├── types 型別定義
+└── views 頁面
 ```
